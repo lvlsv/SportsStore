@@ -141,8 +141,33 @@ namespace SportsStore.UnitTests
             //Assert
             Assert.AreEqual(result.Length, 3);
             Assert.AreEqual(result[0], "Apples");
-            Assert.AreEqual(result[0], "Oranges");
-            //Assert.AreEqual(result[2], "Cocos");
+            Assert.AreEqual(result[1], "Cocos");
+            Assert.AreEqual(result[2], "Oranges");
+        }
+        [TestMethod]
+        public void Generate_Category_Specific_Product_Count()
+        {
+            Mock<IProductRepository> mock = new Mock<IProductRepository>();
+
+            mock.Setup(m => m.Products).Returns(new Product[]
+            {
+                new Product {ProductId = 1, Name = "P1", Category = "Cat1" },
+                new Product {ProductId = 2, Name = "P2", Category = "Cat1" },
+                new Product {ProductId = 3, Name = "P3", Category = "Cat3" },
+                new Product {ProductId = 4, Name = "P4", Category = "Cat1" },
+                new Product {ProductId = 5, Name = "P5", Category = "Cat2" },
+                new Product {ProductId = 6, Name = "P6", Category = "Cat2" }
+            }.AsQueryable());
+            ProductController controller = new ProductController(mock.Object);
+            controller.PageSize = 3;
+
+            int res1 = ((ProductsListViewModel)controller.List("Cat1").Model).PagingInfo.TotalItems;
+            int res2 = ((ProductsListViewModel)controller.List("Cat2").Model).PagingInfo.TotalItems;
+            int res3 = ((ProductsListViewModel)controller.List("Cat3").Model).PagingInfo.TotalItems;
+
+            Assert.AreEqual(res1, 3);
+            Assert.AreEqual(res2, 2);
+            Assert.AreEqual(res3, 1);
         }
     }
 }

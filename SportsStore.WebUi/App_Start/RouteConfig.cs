@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace SportsStore.WebUi
@@ -13,14 +9,15 @@ namespace SportsStore.WebUi
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            routes.MapRoute(null, "", 
-                new
-                    {
-                        controller = "Product",
-                        action = "List",
-                        category = (string)null,
-                        page = 1
-                    }
+            routes.MapRoute(null,
+              "",
+              new
+              {
+                  controller = "Product",
+                  action = "List",
+                  category = (string)null,
+                  page = 1
+              }
             );
 
             routes.MapRoute(null,
