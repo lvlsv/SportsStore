@@ -9,6 +9,7 @@ using SportsStore.Domain.Abstract;
 using SportsStore.Domain.Entities;
 using System.Linq;
 using SportsStore.WebUi.Controllers;
+using System.Collections.Generic;
 
 namespace SportsStore.UnitTests
 {
@@ -33,7 +34,7 @@ namespace SportsStore.UnitTests
             controller.PageSize = 3;
 
             //Action
-            ProductsListViewModel result = (ProductsListViewModel)controller.List(2).Model;
+            ProductsListViewModel result = (ProductsListViewModel)controller.List(null, 2).Model;
 
             //Assert
             Product[] prodArray = result.Products.ToArray();
@@ -82,7 +83,7 @@ namespace SportsStore.UnitTests
             controller.PageSize = 3;
 
             //Act
-            ProductsListViewModel result = (ProductsListViewModel)controller.List(2).Model;
+            ProductsListViewModel result = (ProductsListViewModel)controller.List(null, 2).Model;
 
             //Assert
             PagingInfo pageInfo = result.PagingInfo;
@@ -91,6 +92,57 @@ namespace SportsStore.UnitTests
             Assert.AreEqual(pageInfo.TotalItems, 5);
             Assert.AreEqual(pageInfo.TotalPages, 2);
 
+        }
+
+        [TestMethod]
+        public void Can_Filter_Product()
+        {
+            //Arrange
+            Mock<IProductRepository> mock = new Mock<IProductRepository>();
+            mock.Setup(m => m.Products).Returns(new Product[]
+            {
+                new Product { ProductId = 1, Name = "P1", Category = "Cat1" },
+                new Product { ProductId = 2, Name = "P2", Category = "Cat1" },
+                new Product { ProductId = 3, Name = "P3", Category = "Cat2" },
+                new Product { ProductId = 4, Name = "P4", Category = "Cat1" },
+                new Product { ProductId = 5, Name = "P5", Category = "Cat3" }
+            }.AsQueryable());
+
+            ProductController controller = new ProductController(mock.Object);
+            controller.PageSize = 3;
+
+            //Action
+            Product[] result = ((ProductsListViewModel)controller.List("Cat2", 1).Model).Products.ToArray();
+
+            //Assert
+            Assert.AreEqual(result.Length, 1);
+            Assert.IsTrue(result[0].Name == "P3" && result[0].Category == "Cat2");
+        }
+
+        [TestMethod]
+        public void Can_Create_Categories()
+        {
+            //Arrange
+            Mock<IProductRepository> mock = new Mock<IProductRepository>();
+            mock.Setup(m => m.Products).Returns(new Product[]
+            {
+                new Product { ProductId = 1, Name = "P1", Category = "Apples" },
+                new Product { ProductId = 2, Name = "P2", Category = "Oranges" },
+                new Product { ProductId = 3, Name = "P3", Category = "Apples" },
+                new Product { ProductId = 4, Name = "P4", Category = "Cocos" },
+                new Product { ProductId = 5, Name = "P5", Category = "Apples" },
+            }.AsQueryable());
+            //Arrange
+            NavController target = new NavController(mock.Object);
+
+            //Act
+            string[] result = ((IEnumerable<string>)target.Menu().Model).ToArray();
+
+            //Assert
+            Assert.AreEqual(result.Length, 3);
+            Assert.AreEqual(result[0], "Apples");
+            Assert.AreEqual(result[0], "Oranges");
+            //Assert.AreEqual(result[2], "Cocos");
         }
     }
 }
